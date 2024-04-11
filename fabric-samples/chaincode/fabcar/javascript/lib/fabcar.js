@@ -18,7 +18,8 @@ class FabCar extends Contract {
                 make: 'Toyota',
                 model: 'Prius',
                 owner: 'Tomoko',
-                
+                mobile: '+918689919086',
+                challans: [],
 
             },
             {
@@ -26,16 +27,16 @@ class FabCar extends Contract {
                 make: 'Ford',
                 model: 'Mustang',
                 owner: 'Brad',
-                
-                 
+                mobile: '+918689919086',
+                challans: [],
             },
             {
                 color: 'green',
                 make: 'Hyundai',
                 model: 'Tucson',
                 owner: 'Jin Soo',
-                
-                
+                mobile: '+918689919086',
+                challans: [],
             },
             
             
@@ -58,7 +59,7 @@ class FabCar extends Contract {
         return carAsBytes.toString();
     }
 
-    async createCar(ctx, carNumber, make, model, color, owner) {
+    async createCar(ctx, carNumber, make, model, color, owner,mobile) {
         console.info('============= START : Create Car ===========');
 
         const car = {
@@ -67,7 +68,8 @@ class FabCar extends Contract {
             make,
             model,
             owner,
-            
+            mobile,
+            challans,
             
         };
 
@@ -94,7 +96,7 @@ class FabCar extends Contract {
         return JSON.stringify(allResults);
     }
 
-    async changeCarOwner(ctx, carNumber, newOwner) {
+    async changeCarOwner(ctx, carNumber, newOwner,newMobile) {
         console.info('============= START : changeCarOwner ===========');
 
         const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
@@ -103,7 +105,7 @@ class FabCar extends Contract {
         }
         const car = JSON.parse(carAsBytes.toString());
         car.owner = newOwner;
-
+        car.mobile = newMobile;
         await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
         console.info('============= END : changeCarOwner ===========');
     }
@@ -188,6 +190,8 @@ class FabCar extends Contract {
                     make : c.make,
                     model : c.model,
                     owner : c.owner,
+                    mobile:c.mobile,
+                    challans : c.challans,
                     sensorID : c.sensorID,
                     speed,
                     
@@ -219,6 +223,8 @@ class FabCar extends Contract {
                         make : c.make,
                         model : c.model,
                         owner : c.owner,
+                        mobile:c.mobile,
+                        challans : c.challans,
                         speed : c.speed,
                         sensorID,
                         };
@@ -245,8 +251,55 @@ class FabCar extends Contract {
         }
 
 
+        // async changeCarSpeed(ctx, carNumber, newSpeed) {
+       
 
+        //     const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
+        //     if (!carAsBytes || carAsBytes.length === 0) {
+        //         throw new Error(`${carNumber} does not exist`);
+        //     }
+        //     const car = JSON.parse(carAsBytes.toString());
+        //     car.speed = newSpeed;
+    
+        //     await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
+            
+        // }
 
+        async addChallan(ctx, key,owner,make,mobile,challanId,f) {
+       
+
+            const carAsBytes = await ctx.stub.getState(key); // get the car from chaincode state
+            if (!carAsBytes || carAsBytes.length === 0) {
+                throw new Error(`${carNumber} does not exist`);
+            }
+            const car = JSON.parse(carAsBytes.toString());
+            
+            car.challans.push({
+                carNumber : key,
+                carOwner : owner,
+                brand : make,
+                contact:mobile,
+                challanID : challanId,
+                fine : f
+            });
+            
+    
+            await ctx.stub.putState(key, Buffer.from(JSON.stringify(car)));
+            
+        }
+
+        
+
+    async getChallans(ctx, carNumber) {
+        const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
+        if (!carAsBytes || carAsBytes.length === 0) {
+            throw new Error(`${carNumber} does not exist`);
+        }
+
+        const car = JSON.parse(carAsBytes.toString());
+        const allResults = car.challans
+        return JSON.stringify({"res":allResults});
+    }
         
            
     
